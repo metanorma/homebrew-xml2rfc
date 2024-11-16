@@ -1,0 +1,45 @@
+= Homebrew formula for xml2rfc
+
+image:https://github.com/metanorma/homebrew-xml2rfc/workflows/test/badge.svg["Test", link="https://github.com/metanorma/homebrew-xml2rfc/actions?workflow=test"]
+
+A Homebrew repository for installing *xml2rfc*, the essential tool for formatting RFCs (Request for Comments) and Internet-Drafts written in XML.
+
+== What is xml2rfc?
+
+*xml2rfc* is a tool developed and maintained by the Internet Engineering Task Force (IETF). It is used to generate and format Internet-Drafts and RFC documents in various output formats, such as:
+
+- Plain text
+- HTML
+- PDF
+
+For more information about *xml2rfc* and its options, refer to the official documentation: https://xml2rfc.tools.ietf.org/[xml2rfc.tools.ietf.org]
+
+== Install xml2rfc
+
+[source,sh]
+----
+# Without installing the xml2rfc tap
+brew install metanorma/xml2rfc/xml2rfc
+
+# Installing the metanorma tap
+brew tap metanorma/xml2rfc
+brew install xml2rfc
+----
+
+== Acceptable Formulae
+
+You can read Homebrew’s Acceptable Formulae document https://github.com/Homebrew/brew/blob/master/docs/Acceptable-Formulae.md[here].
+
+== Troubleshooting
+
+First, please run `brew update` and `brew doctor`.
+
+Second, read the https://github.com/Homebrew/brew/blob/master/docs/Troubleshooting.md#troubleshooting[Troubleshooting Checklist].
+
+== More Documentation
+
+`brew help`, `man brew` or check https://github.com/Homebrew/brew/tree/master/docs#readme[our documentation].
+
+== License
+
+Code is under the https://github.com/Homebrew/brew/tree/master/LICENSE.txt[BSD 2 Clause license].

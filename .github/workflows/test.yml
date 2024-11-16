@@ -1,0 +1,60 @@
+name: test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+concurrency:
+  group: '${{ github.workflow }}-${{ matrix.formula }}-${{ github.head_ref || github.ref_name }}'
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Install on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ macos-14, macos-12, macos-11, ubuntu-latest ]
+        formula: [ xml2rfc ]
+        experimental: [ false ]
+        include:
+        - formula: xml2rfc
+          os: macos-10.15
+          experimental: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: brew update-reset
+
+      - name: setup brew
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          case "$(uname -sr)" in
+            Darwin*)
+              mkdir -p $(dirname $(brew --repository $GITHUB_REPOSITORY))
+              ln -s $PWD $(brew --repository $GITHUB_REPOSITORY)
+              ;;
+
+            Linux*)
+              # https://docs.brew.sh/Homebrew-on-Linux
+              /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+              test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
+              test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+              test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.bash_profile
+              echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.profile
+              echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+              ;;
+          esac
+
+      - run: brew audit --strict --formula Formula/${{ matrix.formula }}.rb
+
+      - run: brew install --build-from-source --verbose --include-test --formula Formula/${{ matrix.formula }}.rb
+
+      - run: which ${{ matrix.formula }}
+
+      - run: brew test --verbose ${{ matrix.formula }}
+
+      - run: brew uninstall ${{ matrix.formula }}
