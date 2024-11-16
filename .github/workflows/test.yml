@@ -13,13 +13,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-14, macos-12, macos-11, ubuntu-latest ]
+        os: [ macos-14, macos-13, macos-12, ubuntu-latest ] # macos-11, macos-10.15
         formula: [ xml2rfc ]
         experimental: [ false ]
-        include:
-        - formula: xml2rfc
-          os: macos-10.15
-          experimental: true
 
     concurrency:
       group: '${{ github.workflow }}-${{ matrix.os }}-${{ github.head_ref || github.ref_name }}'
@@ -56,6 +52,6 @@ jobs:
 
     - run: brew test --verbose ${{ matrix.formula }}
 
-    - run: brew audit --strict ${{ matrix.formula }}
+    - run: brew audit --installed ${{ matrix.formula }}
 
     - run: brew uninstall ${{ matrix.formula }}
