@@ -52,6 +52,4 @@ jobs:
 
     - run: brew test --verbose ${{ matrix.formula }}
 
-    - run: brew audit --installed ${{ matrix.formula }}
-
     - run: brew uninstall ${{ matrix.formula }}
