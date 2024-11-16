@@ -28,8 +28,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - run: brew update-reset
-
     - name: setup brew
       if: matrix.os == 'ubuntu-latest'
       run: |
@@ -49,6 +47,8 @@ jobs:
             echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
             ;;
         esac
+
+    - run: brew update-reset
 
     - run: brew install --build-from-source --verbose --include-test --formula Formula/${{ matrix.formula }}.rb
 
