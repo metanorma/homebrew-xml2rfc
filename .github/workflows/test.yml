@@ -50,12 +50,12 @@ jobs:
             ;;
         esac
 
-    - run: brew audit --strict --formula Formula/${{ matrix.formula }}.rb
-
     - run: brew install --build-from-source --verbose --include-test --formula Formula/${{ matrix.formula }}.rb
 
     - run: which ${{ matrix.formula }}
 
     - run: brew test --verbose ${{ matrix.formula }}
+
+    - run: brew audit --strict ${{ matrix.formula }}
 
     - run: brew uninstall ${{ matrix.formula }}
