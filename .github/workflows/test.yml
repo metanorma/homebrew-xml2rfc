@@ -25,7 +25,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: setup brew
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'ubuntu-22.04'
       run: |
         case "$(uname -sr)" in
           Darwin*)
