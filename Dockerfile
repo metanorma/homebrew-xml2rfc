@@ -28,3 +28,5 @@ RUN ~/.linuxbrew/bin/brew --version
 COPY Formula Formula
 
 RUN ~/.linuxbrew/bin/brew install --build-from-source --verbose --include-test --formula Formula/xml2rfc.rb
+
+RUN ~/.linuxbrew/bin/brew test --verbose xml2rfc
