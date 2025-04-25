@@ -6,18 +6,20 @@ class Xml2rfc < Formula
   desc "Tool to convert XML RFC7749 to the original ASCII or the new HTML look-and-feel"
   homepage "https://xml2rfc.tools.ietf.org/"
 
-  url "https://files.pythonhosted.org/packages/19/5a/4e4cbd0d669ff6bd368ba185bfbad3fb91ac4d500374398d2e245ddc5394/xml2rfc-3.28.1.tar.gz"
-  sha256 "76201b28f5b5d4c466dad74d972b3260013db0f462c76ebc633ea1c7fcd87194"
+  # > updater/main.py formula_url #
+  resource "xml2rfc" do
+    url "https://files.pythonhosted.org/packages/19/5a/4e4cbd0d669ff6bd368ba185bfbad3fb91ac4d500374398d2e245ddc5394/xml2rfc-3.28.1.tar.gz"
+    sha256 "76201b28f5b5d4c466dad74d972b3260013db0f462c76ebc633ea1c7fcd87194"
+  end
+# < updater/main.py formula_url #
 
   license "0BSD"
-  revision 1 # 2.42.0
+  revision 1
 
   depends_on "libxslt" if OS.linux?
   depends_on "python@3.12"
 
-  # Dependencies, `hashin decorator==4.4.2 ... -r requirements.txt --verbose` can help build list below
-  # Alternatively use https://docs.brew.sh/Python-for-Formula-Authors:
-  # mkdir xml2rfc && cd xml2rfc && python3 -m venv venv && source venv/bin/activate && pip install xml2rfc homebrew-pypi-poet && poet xml2rfc
+  # > updater/main.py formula_dependencies #
   resource "certifi" do
     url "https://files.pythonhosted.org/packages/1c/ab/c9f1e32b7b1bf505bf26f0ef697775960db7932abeb7b516de930ba2705f/certifi-2025.1.31.tar.gz"
     sha256 "3d5da6925056f6f18f119200434a4780a94263f10d1c21d032a6f6b2baa20651"
@@ -34,8 +36,6 @@ class Xml2rfc < Formula
   end
 
   resource "google-i18n-address" do
-    # Source package doesn't work here for some reason
-    # url "https://files.pythonhosted.org/packages/fe/52/d00c490e19a727ee67e97ff04fd2ed7003088b0e28f40604784c97c4c946/google_i18n_address-3.1.1.tar.gz"
     url "https://files.pythonhosted.org/packages/37/75/c4dadb4845c8c930b94c8ff9d2dfa9855c0a005366af539fee8095e30765/google_i18n_address-3.1.1-py2.py3-none-any.whl"
     sha256 "f66f4fd2b75d1cd371fc0a7678a1d656da4aa3b32932279e78dd6cae776fc23d"
   end
@@ -99,6 +99,7 @@ class Xml2rfc < Formula
     url "https://files.pythonhosted.org/packages/6c/63/53559446a878410fc5a5974feb13d31d78d752eb18aeba59c7fef1af7598/wcwidth-0.2.13.tar.gz"
     sha256 "72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"
   end
+  # < updater/main.py formula_dependencies #
 
   def install
     venv = virtualenv_create(libexec, "python3")
