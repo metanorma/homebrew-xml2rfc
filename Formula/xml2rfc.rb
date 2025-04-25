@@ -34,8 +34,10 @@ class Xml2rfc < Formula
   end
 
   resource "google-i18n-address" do
-    url "https://files.pythonhosted.org/packages/fe/52/d00c490e19a727ee67e97ff04fd2ed7003088b0e28f40604784c97c4c946/google_i18n_address-3.1.1.tar.gz"
-    sha256 "c9ea70e35cb312948651fbbbe4ad4ba97781e129096502fab6ed4e94f629ab0e"
+    # Source package doesn't work here for some reason
+    # url "https://files.pythonhosted.org/packages/fe/52/d00c490e19a727ee67e97ff04fd2ed7003088b0e28f40604784c97c4c946/google_i18n_address-3.1.1.tar.gz"
+    url "https://files.pythonhosted.org/packages/37/75/c4dadb4845c8c930b94c8ff9d2dfa9855c0a005366af539fee8095e30765/google_i18n_address-3.1.1-py2.py3-none-any.whl"
+    sha256 "f66f4fd2b75d1cd371fc0a7678a1d656da4aa3b32932279e78dd6cae776fc23d"
   end
 
   resource "idna" do
