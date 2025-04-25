@@ -1,0 +1,70 @@
+name: update-formula
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # every day at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  push-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Create Python venv and run updater
+        working-directory: updater
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          python main.py
+
+      - name: Check if Formula/xml2rfc.rb changed
+        id: filecheck
+        run: |
+          if git diff --quiet HEAD Formula/xml2rfc.rb; then
+            echo "modified=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "modified=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate digest and create PR if needed
+        if: steps.filecheck.outputs.modified == 'true'
+        run: |
+          set -e
+          
+          DIGEST=$(shasum Formula/xml2rfc.rb | cut -c1-8)
+          BRANCH="update/xml2rfc-$DIGEST"
+          
+          git config --global user.name "metanorma-ci"
+          git config --global user.email "metanorma-ci@users.noreply.github.com"
+          
+          # Check if the branch already exists remotely
+          if git ls-remote --exit-code --heads origin "$BRANCH"; then
+            echo "Branch $BRANCH already exists on remote. Skipping commit and push."
+          else
+            git checkout -b "$BRANCH"
+            git add Formula/xml2rfc.rb
+            git commit -m "Update xml2rfc formula ($DIGEST)"
+            git push origin "$BRANCH"
+          
+            PR_EXISTS=$(gh pr list --head "$BRANCH" --json number --jq 'length')
+            if [ "$PR_EXISTS" -eq 0 ]; then
+              gh pr create \
+                --title "Update xml2rfc formula" \
+                --body "This PR updates the xml2rfc formula based on automated changes." \
+                --base main \
+                --head "$BRANCH"
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
