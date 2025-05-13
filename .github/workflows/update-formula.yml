@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  push-tag:
+  update-formula:
     runs-on: ubuntu-latest
 
     steps:
@@ -67,4 +67,4 @@ jobs:
             fi
           fi
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
