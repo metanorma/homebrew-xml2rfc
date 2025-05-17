@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 class Xml2rfc < Formula
   include Language::Python::Virtualenv
 
@@ -14,8 +12,12 @@ class Xml2rfc < Formula
   license "0BSD"
   head "https://github.com/ietf-tools/xml2rfc.git", branch: "main"
 
-  depends_on "libxslt" if OS.linux?
   depends_on "python@3.12"
+  uses_from_macos "libxml2", since: :ventura
+  uses_from_macos "libxslt"
+  on_linux do
+    depends_on "libxslt"
+  end
 
   # > updater/main.py formula_dependencies #
   resource "certifi" do
@@ -104,7 +106,7 @@ class Xml2rfc < Formula
   end
 
   test do
-    assert_match /usage: xml2rfc/, shell_output(bin/"xml2rfc --help")
-    assert_match /xml2rfc \d+.\d+.\d+/, shell_output(bin/"xml2rfc --version")
+    assert_match(/usage: xml2rfc/, shell_output(bin/"xml2rfc --help"))
+    assert_match(/xml2rfc \d+.\d+.\d+/, shell_output(bin/"xml2rfc --version"))
   end
 end
