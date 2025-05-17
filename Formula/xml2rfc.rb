@@ -12,7 +12,7 @@ class Xml2rfc < Formula
   # < updater/main.py formula_url #
 
   license "0BSD"
-  revision 1
+  head "https://github.com/ietf-tools/xml2rfc.git", branch: "main"
 
   depends_on "libxslt" if OS.linux?
   depends_on "python@3.12"
@@ -100,9 +100,7 @@ class Xml2rfc < Formula
   # < updater/main.py formula_dependencies #
 
   def install
-    venv = virtualenv_create(libexec, "python3")
-    venv.pip_install resources
-    venv.pip_install_and_link buildpath
+    virtualenv_install_with_resources
   end
 
   test do
