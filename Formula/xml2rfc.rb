@@ -3,23 +3,18 @@ class Xml2rfc < Formula
 
   desc "Tool to convert XML RFC7749 to the original ASCII or the new HTML look-and-feel"
   homepage "https://xml2rfc.tools.ietf.org/"
-
-  # > updater/main.py formula_url #
   url "https://files.pythonhosted.org/packages/19/5a/4e4cbd0d669ff6bd368ba185bfbad3fb91ac4d500374398d2e245ddc5394/xml2rfc-3.28.1.tar.gz"
   sha256 "76201b28f5b5d4c466dad74d972b3260013db0f462c76ebc633ea1c7fcd87194"
-  # < updater/main.py formula_url #
-
-  license "0BSD"
+  license "BSD-3-Clause"
   head "https://github.com/ietf-tools/xml2rfc.git", branch: "main"
 
   depends_on "python@3.12"
   uses_from_macos "libxml2", since: :ventura
   uses_from_macos "libxslt"
+
   on_linux do
     depends_on "libxslt"
   end
-
-  # > updater/main.py formula_dependencies #
   resource "certifi" do
     url "https://files.pythonhosted.org/packages/e8/9e/c05b3920a3b7d20d3d3310465f50348e5b3694f4f88c6daf736eef3024c4/certifi-2025.4.26.tar.gz"
     sha256 "0a816057ea3cdefcef70270d2c515e4506bbc954f417fa5ade2021213bb8f0c6"
@@ -99,14 +94,58 @@ class Xml2rfc < Formula
     url "https://files.pythonhosted.org/packages/6c/63/53559446a878410fc5a5974feb13d31d78d752eb18aeba59c7fef1af7598/wcwidth-0.2.13.tar.gz"
     sha256 "72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"
   end
-  # < updater/main.py formula_dependencies #
 
   def install
     virtualenv_install_with_resources
   end
 
   test do
-    assert_match(/usage: xml2rfc/, shell_output(bin/"xml2rfc --help"))
-    assert_match(/xml2rfc \d+.\d+.\d+/, shell_output(bin/"xml2rfc --version"))
+    assert_match version.to_s, shell_output("#{bin}/xml2rfc --version")
+
+    (testpath/"test.xml").write <<~XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <rfc category="info" docName="draft-sample-input-00"
+         ipr="trust200902" submissionType="IETF">
+      <?v3xml2rfc silence="The document date .*? is more than 3 days away from today's date" ?>
+      <front>
+        <title abbrev="Abbreviated Title">Put Your Internet Draft Title</title>
+        <author fullname="John Doe" initials="J." role="editor" surname="Doe">
+          <organization abbrev="Company">Company</organization>
+          <address>
+            <postal>
+              <street></street>
+              <city>Springfield</city>
+              <region>IL</region>
+              <country>US</country>
+            </postal>
+            <email>jdoe@example.com</email>
+          </address>
+        </author>
+        <date month="December" year="2010" day="10"/>
+        <abstract>
+          <t>Insert an abstract: MANDATORY. This template is for creating an
+            Internet-Draft.  With some out of scope characters
+            in Chinese, by Xing Xing, 这里是中文译本
+          </t>
+        </abstract>
+      </front>
+      <middle>
+        <section title="Some unicode strings">
+          <t>Text body needs to deal with &#8216;funny&#8217; characters</t>
+          <t>Pure out of scope 这里是中文译本</t>
+          <t>Some re-mapped characters are ¢ or ©</t>
+          <t>More re-mapped characters are ˜ and € and &#0094;</t>
+        </section>
+      </middle>
+    </rfc>
+  XML
+
+    system "#{bin}/xml2rfc", "test.xml", "--text", "--out", "out.txt"
+
+    output = (testpath/"out.txt").read
+    assert_match "Put Your Internet Draft Title", output
+    assert_match "J. Doe", output
+    assert_match "Text body needs to deal with", output
+    assert_match "这里是中文译本", output
   end
 end
