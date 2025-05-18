@@ -2,6 +2,7 @@ import codecs
 import json
 import logging
 import re
+import subprocess
 import sys
 import warnings
 from contextlib import closing
@@ -9,14 +10,8 @@ from hashlib import sha256
 from urllib.request import urlopen
 
 import pkg_resources
-from poet import merge_graphs, make_graph, RESOURCE_TEMPLATE, PackageVersionNotFoundWarning
-from poet.templates import env
+from poet import merge_graphs, make_graph, PackageVersionNotFoundWarning
 
-
-URL_NAME_TEMPLATE = env.from_string("""\
-  url "{{ resource.url }}"
-  {{ resource.checksum_type }} "{{ resource.checksum }}"
-""")
 
 # Extracted from poet
 def research_package(name, version=None, package_type='sdist'):
@@ -63,18 +58,85 @@ def research_package(name, version=None, package_type='sdist'):
     return d
 
 
-def replace_between_markers(filename, new_text, start_marker, end_marker):
+def replace_resources_with_brew_output(formula_path, formula_name):
+    # Get new resources block from `brew update-python-resources`
+    result = subprocess.run(
+        ["brew", "update-python-resources", formula_name, "--package-name", formula_name, "--print-only"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding="utf-8",
+        check=True
+    )
+    new_resources = result.stdout.strip()
+
+    # Read the original formula
+    with open(formula_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    # Replace from first `resource ...` to (but not including) `def install`
+    pattern = re.compile(r'^(\s*resource\b.*?)(?=^(\s*def install\b))', re.DOTALL | re.MULTILINE)
+
+    updated_content = pattern.sub('\n  ' + new_resources.rstrip() + '\n', content, count=1)
+
+    # Write back the updated content
+    with open(formula_path, 'w', encoding='utf-8') as f:
+        f.write(updated_content)
+
+    print("Resource blocks updated in", formula_path)
+
+
+def replace_url_sha256(filename: str, new_url: str, new_sha256: str):
+    with open(filename, 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+
+    url_pattern = re.compile(r'^\s*url\s+["\'].*["\']')
+    sha_pattern = re.compile(r'^\s*sha256\s+["\'].*["\']')
+
+    replaced = False
+    for i in range(len(lines) - 1):
+        if url_pattern.match(lines[i]) and sha_pattern.match(lines[i + 1]):
+            lines[i] = f'  url "{new_url}"\n'
+            lines[i + 1] = f'  sha256 "{new_sha256}"\n'
+            replaced = True
+            break
+
+    if not replaced:
+        raise ValueError("Could not find url and sha256 lines to replace.")
+
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.writelines(lines)
+
+
+def update_resource_url_sha256(filename: str, resource_name: str, new_url: str, new_sha256: str):
     with open(filename, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    pattern = re.compile(rf"({re.escape(start_marker)})(.*?){re.escape(end_marker)}", re.DOTALL)
+    # Match the resource block for the given name
+    resource_pattern = re.compile(
+        rf'(^\s*resource\s+"{re.escape(resource_name)}"\s+do\s*\n)(.*?)(^\s*end\s*$)',
+        re.DOTALL | re.MULTILINE
+    )
 
-    replacement = f"{start_marker}\n{new_text}\n{end_marker}"
+    match = resource_pattern.search(content)
+    if not match:
+        raise ValueError(f"Resource block for '{resource_name}' not found.")
 
-    new_content = pattern.sub(replacement, content)
+    resource_header, resource_body, resource_footer = match.groups()
+
+    # Replace url and sha256 lines in the body
+    updated_body = re.sub(r'^\s*url\s+".*"', f'    url "{new_url}"', resource_body, flags=re.MULTILINE)
+    updated_body = re.sub(r'^\s*sha256\s+".*"', f'    sha256 "{new_sha256}"', updated_body, flags=re.MULTILINE)
+
+    # Combine new resource block
+    new_block = f"{resource_header}{updated_body}{resource_footer}"
+
+    # Replace the original block with the updated one
+    new_content = content[:match.start()] + new_block + content[match.end():]
 
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(new_content)
+
+    print(f"Updated URL and sha256 for resource '{resource_name}' in {filename}")
 
 
 if __name__ == '__main__':
@@ -89,26 +151,16 @@ if __name__ == '__main__':
     # Ah-hoc patch to force binary package for google-i18n-address.
     # The source package does not work for the formula for some reason
     google_i18n_address = "google-i18n-address"
-    if google_i18n_address in nodes.keys():
-        i18n_node = nodes[google_i18n_address]
-        i18n_binary_node = research_package(google_i18n_address, version=i18n_node['version'], package_type="bdist_wheel")
-        print(i18n_binary_node)
-        if "url" in i18n_binary_node:
-            nodes[google_i18n_address] = i18n_binary_node
+    i18n_node = nodes[google_i18n_address]
+    i18n_binary_node = research_package(google_i18n_address, version=i18n_node['version'], package_type="bdist_wheel")
+    if "url" in i18n_binary_node:
+        nodes[google_i18n_address] = i18n_binary_node
 
-    package_text = URL_NAME_TEMPLATE.render(resource=package_node)
-    dependency_text = '\n\n'.join([RESOURCE_TEMPLATE.render(resource=node) for node in nodes.values()])
+    # Update formula package
+    replace_url_sha256(formula_file, package_node["url"], package_node["checksum"])
 
-    replace_between_markers(
-        filename=formula_file,
-        new_text=package_text,
-        start_marker="# > updater/main.py formula_url #",
-        end_marker="  # < updater/main.py formula_url #"
-    )
+    # Update dependencies
+    replace_resources_with_brew_output(formula_file, "xml2rfc")
 
-    replace_between_markers(
-        filename=formula_file,
-        new_text=dependency_text,
-        start_marker="# > updater/main.py formula_dependencies #",
-        end_marker="  # < updater/main.py formula_dependencies #"
-    )
+    # Override "google-i18n-address"
+    update_resource_url_sha256(formula_file, "google-i18n-address", i18n_binary_node["url"], i18n_binary_node["checksum"])
