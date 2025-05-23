@@ -3,23 +3,29 @@ class Xml2rfc < Formula
 
   desc "Tool to convert XML RFC7749 to the original ASCII or the new HTML look-and-feel"
   homepage "https://xml2rfc.tools.ietf.org/"
-
-  # > updater/main.py formula_url #
   url "https://files.pythonhosted.org/packages/19/5a/4e4cbd0d669ff6bd368ba185bfbad3fb91ac4d500374398d2e245ddc5394/xml2rfc-3.28.1.tar.gz"
   sha256 "76201b28f5b5d4c466dad74d972b3260013db0f462c76ebc633ea1c7fcd87194"
-  # < updater/main.py formula_url #
-
-  license "0BSD"
+  license "BSD-3-Clause"
   head "https://github.com/ietf-tools/xml2rfc.git", branch: "main"
 
-  depends_on "python@3.12"
+  bottle do
+    sha256 cellar: :any,                 arm64_sequoia: "edf0d2a76759f3a8a6c9459c2c05e4442b889e66d7fadbedf0d841dceb1b151e"
+    sha256 cellar: :any,                 arm64_sonoma:  "d93dea3b5ef178c6b10fd8b5bc76faee5310be43e6dadc30134b0a4e4864125b"
+    sha256 cellar: :any,                 arm64_ventura: "200d6b1f33b1936898fdcfcd92434171d140fe4987b6224d3bee32003a3105f9"
+    sha256 cellar: :any,                 sonoma:        "fffae6f1d3be9df52221047be7a43ffda10b45c2f5b91e58222ea715dfa29356"
+    sha256 cellar: :any,                 ventura:       "9f2dddcf991e8d75c0313d7874baa2c94fd80617790d7bbd6786d4a79c47a0f5"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "476e0bec1830d5ab810bcef54231012ef1697eeb0968f2f644a991255fb36979"
+  end
+
+  depends_on "libyaml"
+  depends_on "python@3.13"
   uses_from_macos "libxml2", since: :ventura
   uses_from_macos "libxslt"
+
   on_linux do
     depends_on "libxslt"
   end
 
-  # > updater/main.py formula_dependencies #
   resource "certifi" do
     url "https://files.pythonhosted.org/packages/e8/9e/c05b3920a3b7d20d3d3310465f50348e5b3694f4f88c6daf736eef3024c4/certifi-2025.4.26.tar.gz"
     sha256 "0a816057ea3cdefcef70270d2c515e4506bbc954f417fa5ade2021213bb8f0c6"
@@ -30,7 +36,7 @@ class Xml2rfc < Formula
     sha256 "5baececa9ecba31eff645232d59845c07aa030f0c81ee70184a90d35099a0e63"
   end
 
-  resource "ConfigArgParse" do
+  resource "configargparse" do
     url "https://files.pythonhosted.org/packages/70/8a/73f1008adfad01cb923255b924b1528727b8270e67cb4ef41eabdc7d783e/ConfigArgParse-1.7.tar.gz"
     sha256 "e7067471884de5478c58a511e529f0f9bd1c66bfef1dea90935438d6c23306d1"
   end
@@ -50,7 +56,7 @@ class Xml2rfc < Formula
     sha256 "902b1b88936918f9b2a19e0e5eb7ccb430ae45cde4f39ea4b36932920d33952d"
   end
 
-  resource "Jinja2" do
+  resource "jinja2" do
     url "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz"
     sha256 "0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d"
   end
@@ -60,7 +66,7 @@ class Xml2rfc < Formula
     sha256 "d12832e1dbea4be280b22fd0ea7c9b87f0d8fc51ba06e92dc62d52f804f78ebd"
   end
 
-  resource "MarkupSafe" do
+  resource "markupsafe" do
     url "https://files.pythonhosted.org/packages/b2/97/5d42485e71dfc078108a86d6de8fa46db44a1a9295e89c5d6d4a06e23a62/markupsafe-3.0.2.tar.gz"
     sha256 "ee55d3edf80167e48ea11a923c7386f4669df67d7994554387f84e7d8b0a2bf0"
   end
@@ -75,7 +81,7 @@ class Xml2rfc < Formula
     sha256 "b61b3faccea67f87d10c1f2b0fc0be714409e8fcdcc1315613174f6466c10221"
   end
 
-  resource "PyYAML" do
+  resource "pyyaml" do
     url "https://files.pythonhosted.org/packages/54/ed/79a089b6be93607fa5cdaedf301d7dfb23af5f25c398d5ead2525b063e17/pyyaml-6.0.2.tar.gz"
     sha256 "d584d9ec91ad65861cc08d42e834324ef890a082e591037abe114850ff7bbc3e"
   end
@@ -83,6 +89,11 @@ class Xml2rfc < Formula
   resource "requests" do
     url "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz"
     sha256 "55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"
+  end
+
+  resource "setuptools" do
+    url "https://files.pythonhosted.org/packages/9e/8b/dc1773e8e5d07fd27c1632c45c1de856ac3dbf09c0147f782ca6d990cf15/setuptools-80.7.1.tar.gz"
+    sha256 "f6ffc5f0142b1bd8d0ca94ee91b30c0ca862ffd50826da1ea85258a06fd94552"
   end
 
   resource "sortedcontainers" do
@@ -99,14 +110,58 @@ class Xml2rfc < Formula
     url "https://files.pythonhosted.org/packages/6c/63/53559446a878410fc5a5974feb13d31d78d752eb18aeba59c7fef1af7598/wcwidth-0.2.13.tar.gz"
     sha256 "72ea0c06399eb286d978fdedb6923a9eb47e1c486ce63e9b4e64fc18303972b5"
   end
-  # < updater/main.py formula_dependencies #
 
   def install
     virtualenv_install_with_resources
   end
 
   test do
-    assert_match(/usage: xml2rfc/, shell_output(bin/"xml2rfc --help"))
-    assert_match(/xml2rfc \d+.\d+.\d+/, shell_output(bin/"xml2rfc --version"))
+    assert_match version.to_s, shell_output("#{bin}/xml2rfc --version")
+
+    (testpath/"test.xml").write <<~XML
+      <?xml version="1.0" encoding="UTF-8"?>
+      <rfc category="info" docName="draft-sample-input-00"
+           ipr="trust200902" submissionType="IETF">
+        <?v3xml2rfc silence="The document date .*? is more than 3 days away from today's date" ?>
+        <front>
+          <title abbrev="Abbreviated Title">Put Your Internet Draft Title</title>
+          <author fullname="John Doe" initials="J." role="editor" surname="Doe">
+            <organization abbrev="Company">Company</organization>
+            <address>
+              <postal>
+                <street></street>
+                <city>Springfield</city>
+                <region>IL</region>
+                <country>US</country>
+              </postal>
+              <email>jdoe@example.com</email>
+            </address>
+          </author>
+          <date month="December" year="2010" day="10"/>
+          <abstract>
+            <t>Insert an abstract: MANDATORY. This template is for creating an
+              Internet-Draft.  With some out of scope characters
+              in Chinese, by Xing Xing, 这里是中文译本
+            </t>
+          </abstract>
+        </front>
+        <middle>
+          <section title="Some unicode strings">
+            <t>Text body needs to deal with &#8216;funny&#8217; characters</t>
+            <t>Pure out of scope 这里是中文译本</t>
+            <t>Some re-mapped characters are ¢ or ©</t>
+            <t>More re-mapped characters are ˜ and € and &#0094;</t>
+          </section>
+        </middle>
+      </rfc>
+    XML
+
+    system bin/"xml2rfc", "test.xml", "--text", "--out", "out.txt"
+
+    output = (testpath/"out.txt").read
+    assert_match "Put Your Internet Draft Title", output
+    assert_match "J. Doe", output
+    assert_match "Text body needs to deal with", output
+    assert_match "这里是中文译本", output
   end
 end
