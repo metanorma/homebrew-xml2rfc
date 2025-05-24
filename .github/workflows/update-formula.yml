@@ -56,6 +56,9 @@ jobs:
           git config --global user.name "metanorma-ci"
           git config --global user.email "metanorma-ci@users.noreply.github.com"
           
+          # Use PAT for pushing to origin
+          git remote set-url origin https://x-access-token:${{ secrets.METANORMA_CI_PAT_TOKEN }}@github.com/${{ github.repository }}.git
+          
           # Check if the branch already exists remotely
           if git ls-remote --exit-code --heads origin "$BRANCH"; then
             echo "Branch $BRANCH already exists on remote. Skipping commit and push."
