@@ -15,16 +15,8 @@ jobs:
           token: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
           fetch-depth: 0
 
-      - name: setup brew
-        if: runner.os == 'Linux'
-        run: |
-          # https://docs.brew.sh/Homebrew-on-Linux
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
-          test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          test -r ~/.bash_profile && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.bash_profile
-          echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.profile
-          echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
 
       - name: debug
         run: |
