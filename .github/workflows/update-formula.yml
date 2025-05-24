@@ -28,6 +28,7 @@ jobs:
 
       - name: debug
         run: |
+          brew update-reset
           brew update-python-resources xml2rfc --package-name xml2rfc --print-only
 
       - name: Set up Python
