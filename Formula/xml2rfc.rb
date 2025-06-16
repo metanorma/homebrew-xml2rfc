@@ -3,8 +3,8 @@ class Xml2rfc < Formula
 
   desc "Tool to convert XML RFC7749 to the original ASCII or the new HTML look-and-feel"
   homepage "https://xml2rfc.tools.ietf.org/"
-  url "https://files.pythonhosted.org/packages/19/5a/4e4cbd0d669ff6bd368ba185bfbad3fb91ac4d500374398d2e245ddc5394/xml2rfc-3.28.1.tar.gz"
-  sha256 "76201b28f5b5d4c466dad74d972b3260013db0f462c76ebc633ea1c7fcd87194"
+  url "https://files.pythonhosted.org/packages/94/2a/bbd76ef42f69d07f7d736c113f4bdd050c7a8e7068f0f397d85185912756/xml2rfc-3.29.0.tar.gz"
+  sha256 "82a1806095ea9a83caa9ee6923bf50f7b7686325042e3e023e34984a54c822db"
   license "BSD-3-Clause"
   head "https://github.com/ietf-tools/xml2rfc.git", branch: "main"
 
@@ -27,8 +27,8 @@ class Xml2rfc < Formula
   end
 
   resource "certifi" do
-    url "https://files.pythonhosted.org/packages/e8/9e/c05b3920a3b7d20d3d3310465f50348e5b3694f4f88c6daf736eef3024c4/certifi-2025.4.26.tar.gz"
-    sha256 "0a816057ea3cdefcef70270d2c515e4506bbc954f417fa5ade2021213bb8f0c6"
+    url "https://files.pythonhosted.org/packages/73/f7/f14b46d4bcd21092d7d3ccef689615220d8a08fb25e564b65d20738e672e/certifi-2025.6.15.tar.gz"
+    sha256 "d747aa5a8b9bbbb1bb8c22bb13e22bd1f18e9796defa16bab421f7f7a317323b"
   end
 
   resource "charset-normalizer" do
@@ -37,8 +37,8 @@ class Xml2rfc < Formula
   end
 
   resource "configargparse" do
-    url "https://files.pythonhosted.org/packages/70/8a/73f1008adfad01cb923255b924b1528727b8270e67cb4ef41eabdc7d783e/ConfigArgParse-1.7.tar.gz"
-    sha256 "e7067471884de5478c58a511e529f0f9bd1c66bfef1dea90935438d6c23306d1"
+    url "https://files.pythonhosted.org/packages/85/4d/6c9ef746dfcc2a32e26f3860bb4a011c008c392b83eabdfb598d1a8bbe5d/configargparse-1.7.1.tar.gz"
+    sha256 "79c2ddae836a1e5914b71d58e4b9adbd9f7779d4e6351a637b7d2d9b6c46d3d9"
   end
 
   resource "google-i18n-address" do
@@ -87,13 +87,13 @@ class Xml2rfc < Formula
   end
 
   resource "requests" do
-    url "https://files.pythonhosted.org/packages/63/70/2bf7780ad2d390a8d301ad0b550f1581eadbd9a20f896afe06353c2a2913/requests-2.32.3.tar.gz"
-    sha256 "55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"
+    url "https://files.pythonhosted.org/packages/e1/0a/929373653770d8a0d7ea76c37de6e41f11eb07559b103b1c02cafb3f7cf8/requests-2.32.4.tar.gz"
+    sha256 "27d0316682c8a29834d3264820024b62a36942083d52caf2f14c0591336d3422"
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/9e/8b/dc1773e8e5d07fd27c1632c45c1de856ac3dbf09c0147f782ca6d990cf15/setuptools-80.7.1.tar.gz"
-    sha256 "f6ffc5f0142b1bd8d0ca94ee91b30c0ca862ffd50826da1ea85258a06fd94552"
+    url "https://files.pythonhosted.org/packages/18/5d/3bf57dcd21979b887f014ea83c24ae194cfcd12b9e0fda66b957c69d1fca/setuptools-80.9.0.tar.gz"
+    sha256 "f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c"
   end
 
   resource "sortedcontainers" do
