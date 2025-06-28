@@ -23,16 +23,7 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Check if Formula/xml2rfc.rb changed
-        id: filecheck
-        run: |
-          if git diff --quiet HEAD Formula/xml2rfc.rb; then
-            echo "modified=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "modified=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Generate digest and create PR if needed
+      - name: Update formula, generate digest and create PR if needed
         if: steps.filecheck.outputs.modified == 'true'
         run: |
           set -e
