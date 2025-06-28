@@ -51,9 +51,11 @@ jobs:
 
           # Re-run the update process to regenerate changes on this branch
           python3 -m venv updater/venv
+          cd updater
           source updater/venv/bin/activate
           pip install -r updater/requirements.txt
           python updater/main.py
+          cd ..s
 
           git add Formula/xml2rfc.rb
           if git diff --cached --quiet; then
