@@ -24,7 +24,6 @@ jobs:
           python-version: '3.13'
 
       - name: Update formula, generate digest and create PR if needed
-        if: steps.filecheck.outputs.modified == 'true'
         run: |
           set -e
 
