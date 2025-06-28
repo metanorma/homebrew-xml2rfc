@@ -23,14 +23,6 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Create Python venv and run updater
-        working-directory: updater
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-          pip install -r requirements.txt
-          python main.py
-
       - name: Check if Formula/xml2rfc.rb changed
         id: filecheck
         run: |
@@ -44,17 +36,17 @@ jobs:
         if: steps.filecheck.outputs.modified == 'true'
         run: |
           set -e
-          
+
           DIGEST=$(shasum Formula/xml2rfc.rb | cut -c1-8)
-          BRANCH="update/xml2rfc-$DIGEST"
-          
+          NEW_BRANCH="update/xml2rfc-$DIGEST"
+
           git config --global user.name "metanorma-ci"
           git config --global user.email "metanorma-ci@users.noreply.github.com"
-          
-          # Use PAT for pushing to origin
+
           git remote set-url origin https://x-access-token:${{ secrets.METANORMA_CI_PAT_TOKEN }}@github.com/${{ github.repository }}.git
-          
-          # Find latest open PR with a branch starting with update/xml2rfc-
+          git fetch origin
+
+          # Find latest open PR branch matching pattern
           BRANCH=$(gh pr list --state open --json headRefName,updatedAt \
             --jq '[.[] | select(.headRefName | startswith("update/xml2rfc-")) | {name: .headRefName, updated: .updatedAt}] | sort_by(.updated) | reverse | .[0].name')
 
@@ -66,22 +58,31 @@ jobs:
             BRANCH="$NEW_BRANCH"
             git checkout -b "$BRANCH"
           fi
-          
-          git checkout -b "$BRANCH"
+
+          # Re-run the update process to regenerate changes on this branch
+          python3 -m venv updater/venv
+          source updater/venv/bin/activate
+          pip install -r updater/requirements.txt
+          python updater/main.py
+
           git add Formula/xml2rfc.rb
-          git commit -m "Update xml2rfc formula ($DIGEST)"
-          git push origin "$BRANCH"
-          
-          # Check if PR already exists
-          PR_EXISTS=$(gh pr list --head "$BRANCH" --json number --jq 'length')
-          if [ "$PR_EXISTS" -eq 0 ]; then
-            gh pr create \
-              --title "Update xml2rfc formula" \
-              --body "This PR updates the xml2rfc formula based on automated changes." \
-              --base main \
-              --head "$BRANCH"
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
           else
-            echo "PR already exists for $BRANCH."
+            git commit -m "Update xml2rfc formula ($DIGEST)"
+            git push -u origin "$BRANCH"
+
+            PR_EXISTS=$(gh pr list --head "$BRANCH" --json number --jq 'length')
+            if [ "$PR_EXISTS" -eq 0 ]; then
+              gh pr create \
+                --title "Update xml2rfc formula" \
+                --body "This PR updates the xml2rfc formula based on automated changes." \
+                --base main \
+                --head "$BRANCH"
+            else
+              echo "PR already exists for $BRANCH."
+            fi
           fi
         env:
           GH_TOKEN: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
+
