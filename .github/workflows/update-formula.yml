@@ -54,23 +54,34 @@ jobs:
           # Use PAT for pushing to origin
           git remote set-url origin https://x-access-token:${{ secrets.METANORMA_CI_PAT_TOKEN }}@github.com/${{ github.repository }}.git
           
-          # Check if the branch already exists remotely
-          if git ls-remote --exit-code --heads origin "$BRANCH"; then
-            echo "Branch $BRANCH already exists on remote. Skipping commit and push."
+          # Find latest open PR with a branch starting with update/xml2rfc-
+          BRANCH=$(gh pr list --state open --json headRefName,updatedAt \
+            --jq '[.[] | select(.headRefName | startswith("update/xml2rfc-")) | {name: .headRefName, updated: .updatedAt}] | sort_by(.updated) | reverse | .[0].name')
+
+          if [ -n "$BRANCH" ]; then
+            echo "Using existing branch with open PR: $BRANCH"
+            git checkout -b "$BRANCH" "origin/$BRANCH"
           else
+            echo "No matching open PR found. Creating new branch: $NEW_BRANCH"
+            BRANCH="$NEW_BRANCH"
             git checkout -b "$BRANCH"
-            git add Formula/xml2rfc.rb
-            git commit -m "Update xml2rfc formula ($DIGEST)"
-            git push origin "$BRANCH"
+          fi
           
-            PR_EXISTS=$(gh pr list --head "$BRANCH" --json number --jq 'length')
-            if [ "$PR_EXISTS" -eq 0 ]; then
-              gh pr create \
-                --title "Update xml2rfc formula" \
-                --body "This PR updates the xml2rfc formula based on automated changes." \
-                --base main \
-                --head "$BRANCH"
-            fi
+          git checkout -b "$BRANCH"
+          git add Formula/xml2rfc.rb
+          git commit -m "Update xml2rfc formula ($DIGEST)"
+          git push origin "$BRANCH"
+          
+          # Check if PR already exists
+          PR_EXISTS=$(gh pr list --head "$BRANCH" --json number --jq 'length')
+          if [ "$PR_EXISTS" -eq 0 ]; then
+            gh pr create \
+              --title "Update xml2rfc formula" \
+              --body "This PR updates the xml2rfc formula based on automated changes." \
+              --base main \
+              --head "$BRANCH"
+          else
+            echo "PR already exists for $BRANCH."
           fi
         env:
           GH_TOKEN: ${{ secrets.METANORMA_CI_PAT_TOKEN }}
