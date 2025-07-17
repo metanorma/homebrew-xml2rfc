@@ -13,9 +13,21 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ macos-14, macos-13, ubuntu-latest, ubuntu-24.04-arm ]
-        formula: [ xml2rfc ]
+        os:
+          - macos-15
+          - macos-14
+          - macos-13
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+        formula:
+          - xml2rfc
         experimental: [ false ]
+
+    # Set environment variables to prevent Homebrew from auto-updating and installing from API
+    # Per https://docs.brew.sh/Adding-Software-to-Homebrew
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_FROM_API: 1
 
     concurrency:
       group: '${{ github.workflow }}-${{ matrix.os }}-${{ github.head_ref || github.ref_name }}'
@@ -24,7 +36,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: setup brew
+    - name: Setup brew (Linux only)
       if: runner.os == 'Linux'
       run: |
         # https://docs.brew.sh/Homebrew-on-Linux
@@ -35,12 +47,30 @@ jobs:
         echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.profile
         echo "/home/linuxbrew/.linuxbrew/bin" >> $GITHUB_PATH
 
+    - name: Confirm brew setup (Linux only)
+      if: runner.os == 'Linux'
+      run: |
+        brew install hello
+
     - run: brew update-reset
 
-    - run: brew install --build-from-source --verbose --include-test --formula Formula/${{ matrix.formula }}.rb
+    # To prevent --build-from-source from failing on macOS
+    - run: brew install python libyaml
 
-    - run: which ${{ matrix.formula }}
+    - name: Audit formula (strict mode)
+      run: brew audit --strict --new --online --formula Formula/${{ matrix.formula }}.rb
 
-    - run: brew test --verbose ${{ matrix.formula }}
+    - name: Style check formula
+      run: brew style --fix --formula Formula/${{ matrix.formula }}.rb
 
-    - run: brew uninstall ${{ matrix.formula }}
+    - name: Install formula from source
+      run: brew install --build-from-source --verbose --include-test --formula Formula/${{ matrix.formula }}.rb
+
+    - name: Verify installation
+      run: which ${{ matrix.formula }}
+
+    - name: Test formula
+      run: brew test --verbose ${{ matrix.formula }}
+
+    - name: Uninstall formula
+      run: brew uninstall ${{ matrix.formula }}
